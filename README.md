@@ -121,14 +121,6 @@ defmodule AccountCreated do
     with: [:date]
 end
 
-iex> AccountCreated.new(cmd)
-%AccountCreated{
-  age: 5,
-  date: nil,
-  email: "chris@example.com",
-  username: "chris",
-  version: 1
-}
 iex> AccountCreated.new(cmd, date: NaiveDateTime.utc_now())
 %AccountCreated{
   age: 5,
