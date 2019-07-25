@@ -89,7 +89,7 @@ iex> cmd = Ecto.Changeset.apply_changes(changeset)
 %CreateAccount{age: 5, email: "chris@example.com", username: "chris"}
 ```
 
-note that `apply_changes` will not validate values.
+> Note that `apply_changes` will not validate values.
 
 ### Events
 
@@ -175,7 +175,7 @@ iex> Commanded.Event.Upcaster.upcast(event, %{})
 %AccountCreated{age: 5, date: nil, sex: "maybe", username: "chris", version: 2}
 ```
 
-Note that you won't normally call `upcast` manually. `Commanded` will take care of that for you.
+> Note that you won't normally call `upcast` manually. `Commanded` will take care of that for you.
 
 ### Command Dispatch Validation
 
@@ -191,4 +191,6 @@ iex> AccountsRouter.validate_and_dispatch(changeset)
 {:error, {:validation_failure, %{age: ["must be greater than 12"]}}}
 ```
 
-I hope you find this library as useful as my team and I do.
+***
+
+I hope you find this library as useful as my team and I do. -Chris
