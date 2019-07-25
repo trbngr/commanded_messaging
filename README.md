@@ -129,6 +129,14 @@ iex> AccountCreated.new(cmd)
   username: "chris",
   version: 1
 }
+iex> AccountCreated.new(cmd, date: NaiveDateTime.utc_now())
+%AccountCreated{
+  age: 5,
+  date: ~N[2019-07-25 08:03:15.372212],
+  email: "chris@example.com",
+  username: "chris",
+  version: 1
+}
 ```
 
 #### Excluding Keys

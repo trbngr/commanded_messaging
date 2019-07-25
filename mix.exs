@@ -18,9 +18,13 @@ defmodule EsMessaging.MixProject do
 
   # Run "mix help compile.app" to learn about applications.
   def application do
-    [
-      included_applications: [:commanded]
-    ]
+    if Mix.env() == :test do
+      [
+        included_applications: [:commanded]
+      ]
+    else
+      []
+    end
   end
 
   # Run "mix help deps" to learn about dependencies.
