@@ -23,7 +23,7 @@ be found at [https://hexdocs.pm/commanded_messaging](https://hexdocs.pm/commande
 
 ### Commands
 
-The Command macro creates an Ecto `embedded_schema` so you can take advantage of the well know `Ecto.Changeset` API.
+The `Commanded.Command` macro creates an Ecto `embedded_schema` so you can take advantage of the well known `Ecto.Changeset` API.
 
 #### Default
 
@@ -89,11 +89,11 @@ iex> cmd = Ecto.Changeset.apply_changes(changeset)
 %CreateAccount{age: 5, email: "chris@example.com", username: "chris"}
 ```
 
-note that apply_changes will not validate values.
+note that `apply_changes` will not validate values.
 
 ### Events
 
-Most events mirror the commands that produce them. So we make it easy to reduce the boilerplate in creating them.
+Most events mirror the commands that produce them. So we make it easy to reduce the boilerplate in creating them with the `Commanded.Event` macro.
 
 ```elixir
 defmodule AccountCreated do
@@ -101,7 +101,7 @@ defmodule AccountCreated do
     from: CreateAccount
 end
 
-iex>AccountCreated.new(cmd)
+iex> AccountCreated.new(cmd)
 %AccountCreated{
   age: 5,
   email: "chris@example.com",
@@ -153,7 +153,7 @@ You may have noticed that we provide a default version of `1`.
 
 You can change the version of an event at anytime. 
 
-After this, you should define an upcast instance.
+After doing so, you should define an upcast instance that knows how to transform older events into the latest version.
 
 ```elixir
 defmodule AccountCreated do
@@ -175,7 +175,7 @@ iex> Commanded.Event.Upcaster.upcast(event, %{})
 %AccountCreated{age: 5, date: nil, sex: "maybe", username: "chris", version: 2}
 ```
 
-Note that you won't call `upcast` manually. `Commanded` will take care of that for you.
+Note that you won't normally call `upcast` manually. `Commanded` will take care of that for you.
 
 ### Command Dispatch Validation
 
@@ -190,3 +190,5 @@ end
 iex> AccountsRouter.validate_and_dispatch(changeset)
 {:error, {:validation_failure, %{age: ["must be greater than 12"]}}}
 ```
+
+I hope you find this library as useful as my team and I do.
