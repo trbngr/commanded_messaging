@@ -1,5 +1,29 @@
 defmodule Commanded.Command do
-  @callback validate(Ecto.Changeset.t()) :: Ecto.Changeset.t()
+  @moduledoc ~S"""
+  Creates an `Ecto.Schema.embedded_schema` that supplies a command with all the validation power of the `Ecto.Changeset` data structure.
+
+      defmodule CreateAccount do
+        use Commanded.Command,
+          username: :string,
+          email: :string,
+          age: :integer
+
+        def handle_validate(changeset) do
+          changeset
+          |> validate_required([:username, :email, :age])
+          |> validate_format(:email, ~r/@/)
+          |> validate_number(:age, greater_than: 12)
+        end
+      end
+
+      iex> CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
+      #Ecto.Changeset<action: nil, changes: %{age: 5, email: "chris@example.com", username: "chris"}, errors: [age: {"must be greater than %{number}", [validation: :number, kind: :greater_than, number: 12]}], data: #CreateAccount<>, valid?: false>
+  """
+
+  @doc """
+  Optional callback to define validation rules
+  """
+  @callback handle_validate(Ecto.Changeset.t()) :: Ecto.Changeset.t()
 
   defmacro __using__(schema) do
     quote do
@@ -20,12 +44,12 @@ defmodule Commanded.Command do
         attrs
         |> Enum.into(%{})
         |> cast()
-        |> validate()
+        |> handle_validate()
       end
 
-      def validate(changeset), do: changeset
+      def handle_validate(changeset), do: changeset
 
-      defoverridable validate: 1
+      defoverridable handle_validate: 1
 
       @cast_keys unquote(schema) |> Enum.into(%{}) |> Map.keys()
 

@@ -1,18 +1,39 @@
 defmodule Commanded.Event do
-  defmodule Helper do
-    def add_version_key(list) when is_list(list) do
-      has_version =
-        Enum.any?(list, fn
-          {:version, _} -> true
-          _ -> false
-        end)
+  @moduledoc ~S"""
+  Creates a domain event structure.
 
-      case has_version do
-        false -> [{:version, 1} | list]
-        true -> list
-      end
-    end
-  end
+  ## Options
+
+    * `from`      - A struct to adapt the keys from.
+    * `with`      - A list of keys to add to the event.
+    * `drop`      - A list of keys to drop from the keys adapted from a struct.
+    * `version`   - An optional version of the event. Defaults to `1`.
+
+  ## Example
+
+        # This is for demonstration purposes only. You don't need to create a new event to version one.
+        defmodule AccountCreatedVersioned do
+          use Commanded.Event,
+            version: 2,
+            from: CreateAccount,
+            with: [:date, :sex],
+            drop: [:email],
+
+          defimpl Commanded.Event.Upcaster, for: AccountCreatedWithDroppedKeys do
+            def upcast(%{version: 1} = event, _metadata) do
+              AccountCreatedVersioned.new(event, sex: "maybe", version: 2)
+            end
+
+            def upcast(event, _metadata), do: event
+          end
+        end
+
+        iex> changeset = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
+        iex> cmd = Ecto.Changeset.apply_changes(changeset)
+        iex> event = AccountCreatedWithDroppedKeys.new(cmd)
+        iex> Commanded.Event.Upcaster.upcast(event, %{})
+        %AccountCreatedVersioned{age: 5, date: nil, sex: "maybe", username: "chris", version: 2}
+  """
 
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
@@ -31,16 +52,15 @@ defmodule Commanded.Event do
             |> Map.keys()
         end
 
-      explicit_keys =
-        Keyword.get(opts, :with, [])
-        |> Helper.add_version_key()
-
-      keys_to_drop = Keyword.get(opts, :except, []) -- [:version]
+      version = Keyword.get(opts, :version, 1)
+      keys_to_drop = Keyword.get(opts, :drop, [])
+      explicit_keys = Keyword.get(opts, :with, [])
 
       @derive Jason.Encoder
       defstruct from
                 |> Kernel.++(explicit_keys)
                 |> Enum.reject(&Enum.member?(keys_to_drop, &1))
+                |> Kernel.++([{:version, version}])
 
       def new(), do: %__MODULE__{}
       def new(source, attrs \\ [])

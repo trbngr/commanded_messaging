@@ -1,54 +1,58 @@
-defmodule PlainCommand do
+defmodule BasicCreateAccount do
   use Commanded.Command,
-    property1: :string,
-    property2: :integer
+    username: :string,
+    email: :string,
+    age: :integer
 end
 
 defmodule CreateAccount do
   use Commanded.Command,
-    user_id: :binary_id,
-    name: :string
+    username: :string,
+    email: :string,
+    age: :integer
 
-  def validate(changeset) do
+  def handle_validate(changeset) do
     changeset
-    |> validate_required([:user_id, :name])
+    |> validate_required([:username, :email, :age])
+    |> validate_format(:email, ~r/@/)
+    |> validate_number(:age, greater_than: 12)
   end
 end
 
-defmodule CreateAccountWithAutoId do
-  use Commanded.Command,
-    user_id: :binary_id,
-    name: :string
-
-  def validate(changeset) do
-    changeset
-    |> put_change(:user_id, UUID.uuid4())
-    |> validate_required([:user_id, :name])
-  end
-end
-
-defmodule PlainEvent do
+defmodule BasicAccountCreated do
   use Commanded.Event,
-    from: PlainCommand
+    from: CreateAccount
 end
 
-defmodule AccountCreatedWithExtras do
+defmodule AccountCreatedWithExtraKeys do
   use Commanded.Event,
     from: CreateAccount,
-    with: [:source]
+    with: [:date]
 end
 
 defmodule AccountCreatedWithDroppedKeys do
   use Commanded.Event,
     from: CreateAccount,
-    except: [:user_id]
+    with: [:date],
+    drop: [:email]
 end
 
-defmodule DefaultVersionEvent do
+defmodule AccountCreatedVersioned do
   use Commanded.Event,
-    from: CreateAccount
+    from: CreateAccount,
+    with: [:date, :sex, version: 2],
+    drop: [:email]
+
+  defimpl Commanded.Event.Upcaster, for: AccountCreatedWithDroppedKeys do
+    def upcast(%{version: 1} = event, _metadata) do
+      AccountCreatedVersioned.new(event, sex: "maybe", version: 2)
+    end
+
+    def upcast(event, _metadata), do: event
+  end
 end
 
-defmodule ExplicitlyVersionedEvent do
-  use Commanded.Event, from: CreateAccount, with: [version: 2]
+defmodule AccountsRouter do
+  use Commanded.Commands.Router
+  use Commanded.CommandDispatchValidation
 end

@@ -15,9 +15,7 @@ def deps do
 end
 ```
 
-~~Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/commanded_messaging](https://hexdocs.pm/commanded_messaging).~~
+[Documentation](https://hexdocs.pm/commanded_messaging)
 
 ## Usage
 
@@ -48,7 +46,7 @@ defmodule CreateAccount do
       email: :string,
       age: :integer
 
-  def validate(changeset) do
+  def handle_validate(changeset) do
     changeset
     |> validate_required([:username, :email, :age])
     |> validate_format(:email, ~r/@/)
@@ -140,7 +138,7 @@ defmodule AccountCreated do
   use Commanded.Event,
     from: CreateAccount,
     with: [:date],
-    except: [:email]
+    drop: [:email]
 end
 
 iex> event = AccountCreated.new(cmd)
@@ -158,9 +156,10 @@ After doing so, you should define an upcast instance that knows how to transform
 ```elixir
 defmodule AccountCreated do
   use Commanded.Event,
+    version: 2,
     from: CreateAccount,
-    with: [:date, :sex, version: 2],
-    except: [:email]
+    with: [:date, :sex],
+    drop: [:email]
 
   defimpl Commanded.Event.Upcaster do
     def upcast(%{version: 1} = event, _metadata) do

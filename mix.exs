@@ -1,15 +1,28 @@
 defmodule EsMessaging.MixProject do
   use Mix.Project
 
+  @version "0.2.0"
+
   def project do
     [
       app: :commanded_messaging,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.6",
       aliases: aliases(),
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      description: "Common macros for messaging in a Commanded application*",
+      source_url: "https://github.com/trbngr/commanded_messaging",
+      package: [
+        licenses: ["MIT"],
+        links: %{"GitHub" => "https://github.com/trbngr/commanded_messaging"}
+      ],
+      docs: [
+        main: "readme",
+        source_ref: "v#{@version}",
+        extras: ["README.md"]
+      ]
     ]
   end
 
@@ -32,7 +45,8 @@ defmodule EsMessaging.MixProject do
       {:elixir_uuid, "~> 1.2", only: :test},
       {:exconstructor, "~> 1.1"},
       {:jason, "~> 1.1"},
-      {:commanded, github: "commanded/commanded", only: :test}
+      {:commanded, "~> 0.19.0", only: :test},
+      {:ex_doc, "~> 0.14", only: :dev, runtime: false}
     ]
   end
 

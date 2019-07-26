@@ -1,4 +1,19 @@
 defmodule Commanded.CommandDispatchValidation do
+  @moduledoc ~S"""
+  Provides validation before dispatching your commands.
+
+  ## Example
+
+      defmodule AccountsRouter do
+        use Commanded.Commands.Router
+        use Commanded.CommandDispatchValidation
+      end
+
+      iex> changeset = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
+      iex> AccountsRouter.validate_and_dispatch(changeset)
+      {:error, {:validation_failure, %{age: ["must be greater than 12"]}}}
+  """
+
   defmacro __using__(_env) do
     quote do
       alias Ecto.Changeset
