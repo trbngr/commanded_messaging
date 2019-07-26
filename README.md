@@ -10,7 +10,7 @@ by adding `commanded_messaging` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:commanded_messaging, github: "trbngr/commanded_messaging"}
+    {:commanded_messaging, "~> 0.2.0"}
   ]
 end
 ```
