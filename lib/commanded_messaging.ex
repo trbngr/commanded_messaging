@@ -27,8 +27,8 @@ defmodule CommandedMessaging do
           email: :string,
           age: :integer
 
-        def handle_validate(changeset) do
-          changeset
+        def handle_validate(command) do
+          command
           |> validate_required([:username, :email, :age])
           |> validate_format(:email, ~r/@/)
           |> validate_number(:age, greater_than: 12)
@@ -43,8 +43,8 @@ defmodule CommandedMessaging do
 
   To create the actual command struct, use `Ecto.Changeset.apply_changes/1`
 
-      iex> changeset = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
-      iex> Ecto.Changeset.apply_changes(changeset)
+      iex> command = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
+      iex> Ecto.Changeset.apply_changes(command)
       %CreateAccount{age: 5, email: "chris@example.com", username: "chris"}
 
   > Note that `apply_changes` will not validate values.
@@ -58,8 +58,8 @@ defmodule CommandedMessaging do
           from: CreateAccount
       end
 
-      iex> changeset = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
-      iex> cmd = Ecto.Changeset.apply_changes(changeset)
+      iex> command = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
+      iex> cmd = Ecto.Changeset.apply_changes(command)
       iex> BasicAccountCreated.new(cmd)
       %BasicAccountCreated{
         age: 5,
@@ -79,8 +79,8 @@ defmodule CommandedMessaging do
           with: [:date]
       end
 
-      iex> changeset = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
-      iex> cmd = Ecto.Changeset.apply_changes(changeset)
+      iex> command = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
+      iex> cmd = Ecto.Changeset.apply_changes(command)
       iex> AccountCreatedWithExtraKeys.new(cmd, date: ~D[2019-07-25])
       %AccountCreatedWithExtraKeys{
         age: 5,
@@ -102,9 +102,9 @@ defmodule CommandedMessaging do
           drop: [:email]
       end
 
-      iex> changeset = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
-      iex> cmd = Ecto.Changeset.apply_changes(changeset)
-      iex> event = AccountCreatedWithDroppedKeys.new(cmd)
+      iex> command = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
+      iex> cmd = Ecto.Changeset.apply_changes(command)
+      iex> AccountCreatedWithDroppedKeys.new(cmd)
       %AccountCreatedWithDroppedKeys{
         age: 5,
         date: nil,
@@ -138,8 +138,8 @@ defmodule CommandedMessaging do
         end
       end
 
-      iex> changeset = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
-      iex> cmd = Ecto.Changeset.apply_changes(changeset)
+      iex> command = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
+      iex> cmd = Ecto.Changeset.apply_changes(command)
       iex> event = AccountCreatedWithDroppedKeys.new(cmd)
       iex> Commanded.Event.Upcaster.upcast(event, %{})
       %AccountCreatedVersioned{age: 5, date: nil, sex: "maybe", username: "chris", version: 2}
@@ -148,16 +148,6 @@ defmodule CommandedMessaging do
 
   ## Command Dispatch Validation
 
-  The `Commanded.CommandDispatchValidation` macro will inject the `validate_and_dispatch` into your `Commanded.Commands.Router`.
-
-      defmodule AccountsRouter do
-        use Commanded.Commands.Router
-        use Commanded.CommandDispatchValidation
-      end
-
-      iex> changeset = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
-      iex> AccountsRouter.validate_and_dispatch(changeset)
-      {:error, {:validation_failure, %{age: ["must be greater than 12"]}}}
-
+  The `Commanded.CommandDispatchValidation` macro will inject the `validate_and_dispatch` function into your `Commanded.Application`.
   """
 end

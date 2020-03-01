@@ -1,7 +1,7 @@
 defmodule EsMessaging.MixProject do
   use Mix.Project
 
-  @version "0.2.0"
+  @version "0.2.1"
 
   def project do
     [
@@ -41,11 +41,11 @@ defmodule EsMessaging.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ecto, "~> 3.0"},
+      {:ecto, "~> 3.3"},
       {:elixir_uuid, "~> 1.2", only: :test},
       {:exconstructor, "~> 1.1"},
       {:jason, "~> 1.1"},
-      {:commanded, "~> 0.19.0", only: :test},
+      {:commanded, "~> 1.0", only: :test},
       {:ex_doc, "~> 0.14", only: :dev, runtime: false}
     ]
   end
