@@ -7,7 +7,7 @@ defmodule EsMessaging.MixProject do
     [
       app: :commanded_messaging,
       version: @version,
-      elixir: "~> 1.6",
+      elixir: "~> 1.9",
       aliases: aliases(),
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
