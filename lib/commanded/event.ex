@@ -43,7 +43,7 @@ defmodule Commanded.Event do
             []
 
           source ->
-            unless Code.ensure_compiled?(source) do
+            unless Code.ensure_compiled(source) do
               raise "#{source} should be a valid struct to use with DomainEvent"
             end
 
