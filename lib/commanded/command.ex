@@ -35,6 +35,8 @@ defmodule Commanded.Command do
       @primary_key false
       embedded_schema do
         Enum.map(unquote(schema), fn
+          {name, {{_, _} = composite_type, opts}} -> field(name, field_type(composite_type), opts)
+          {name, {{_, _} = composite_type}} -> field(name, field_type(composite_type))
           {name, {type, opts}} -> field(name, field_type(type), opts)
           {name, type} -> field(name, field_type(type))
         end)
@@ -60,5 +62,8 @@ defmodule Commanded.Command do
   end
 
   def field_type(:binary_id), do: Ecto.UUID
+  def field_type(:array) do
+    raise "`:array` is not a valid Ecto.Type\nIf you are using a composite data type, wrap the type definition like this `{{:array, :string}}`"
+  end
   def field_type(type), do: type
 end
