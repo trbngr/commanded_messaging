@@ -28,11 +28,10 @@ defmodule Commanded.Event do
           end
         end
 
-        iex> changeset = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
-        iex> cmd = Ecto.Changeset.apply_changes(changeset)
-        iex> event = AccountCreatedWithDroppedKeys.new(cmd)
-        iex> Commanded.Event.Upcaster.upcast(event, %{})
-        %AccountCreatedVersioned{age: 5, date: nil, sex: "maybe", username: "chris", version: 2}
+        # iex> cmd = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
+        # iex> event = AccountCreatedWithDroppedKeys.new(cmd)
+        # iex> Commanded.Event.Upcaster.upcast(event, %{})
+        # %AccountCreatedVersioned{age: 5, date: nil, sex: "maybe", username: "chris", version: 2}
   """
 
   defmacro __using__(opts) do

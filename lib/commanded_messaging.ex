@@ -16,8 +16,7 @@ defmodule CommandedMessaging do
       end
 
       iex> BasicCreateAccount.new()
-      #Ecto.Changeset<action: nil, changes: %{}, errors: [], data: #BasicCreateAccount<>, valid?: true>
-
+      %BasicCreateAccount{age: nil, email: nil, username: nil}
 
   ### Validation
 
@@ -35,15 +34,15 @@ defmodule CommandedMessaging do
         end
       end
 
-      iex> CreateAccount.new()
+      iex> CreateAccount.validate(%{age: nil, aliases: nil, email: nil, username: nil})
       #Ecto.Changeset<action: nil, changes: %{}, errors: [username: {"can't be blank", [validation: :required]}, email: {"can't be blank", [validation: :required]}, age: {"can't be blank", [validation: :required]}], data: #CreateAccount<>, valid?: false>
 
-      iex> CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
+      iex> CreateAccount.validate(%{username: "chris", email: "chris@example.com", age: 5})
       #Ecto.Changeset<action: nil, changes: %{age: 5, email: "chris@example.com", username: "chris"}, errors: [age: {"must be greater than %{number}", [validation: :number, kind: :greater_than, number: 12]}], data: #CreateAccount<>, valid?: false>
 
   To create the actual command struct, use `Ecto.Changeset.apply_changes/1`
 
-      iex> command = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
+      iex> command = CreateAccount.validate(%{username: "chris", email: "chris@example.com", age: 5})
       iex> Ecto.Changeset.apply_changes(command)
       %CreateAccount{age: 5, email: "chris@example.com", username: "chris"}
 
@@ -58,8 +57,7 @@ defmodule CommandedMessaging do
           from: CreateAccount
       end
 
-      iex> command = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
-      iex> cmd = Ecto.Changeset.apply_changes(command)
+      iex> cmd = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
       iex> BasicAccountCreated.new(cmd)
       %BasicAccountCreated{
         age: 5,
@@ -79,8 +77,7 @@ defmodule CommandedMessaging do
           with: [:date]
       end
 
-      iex> command = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
-      iex> cmd = Ecto.Changeset.apply_changes(command)
+      iex> cmd = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
       iex> AccountCreatedWithExtraKeys.new(cmd, date: ~D[2019-07-25])
       %AccountCreatedWithExtraKeys{
         age: 5,
@@ -102,8 +99,7 @@ defmodule CommandedMessaging do
           drop: [:email]
       end
 
-      iex> command = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
-      iex> cmd = Ecto.Changeset.apply_changes(command)
+      iex> cmd = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
       iex> AccountCreatedWithDroppedKeys.new(cmd)
       %AccountCreatedWithDroppedKeys{
         age: 5,
@@ -138,8 +134,7 @@ defmodule CommandedMessaging do
         end
       end
 
-      iex> command = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
-      iex> cmd = Ecto.Changeset.apply_changes(command)
+      iex> cmd = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
       iex> event = AccountCreatedWithDroppedKeys.new(cmd)
       iex> Commanded.Event.Upcaster.upcast(event, %{})
       %AccountCreatedVersioned{age: 5, date: nil, sex: "maybe", username: "chris", version: 2}

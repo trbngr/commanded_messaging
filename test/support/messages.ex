@@ -20,6 +20,21 @@ defmodule CreateAccount do
   end
 end
 
+defmodule CreateFakeAccount do
+  use Commanded.Command,
+    username: :string,
+    email: :string,
+    age: :integer,
+    aliases: {{:array, :string}}
+
+  def handle_validate(changeset) do
+    changeset
+    |> validate_required([:username, :email, :age])
+    |> validate_format(:email, ~r/@/)
+    |> validate_number(:age, greater_than: 12)
+  end
+end
+
 defmodule BasicAccountCreated do
   use Commanded.Event,
     from: CreateAccount

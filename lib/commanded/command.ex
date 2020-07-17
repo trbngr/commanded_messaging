@@ -18,7 +18,13 @@ defmodule Commanded.Command do
       end
 
       iex> CreateAccount.new(username: "chris", email: "chris@example.com", age: 5, aliases: ["christopher", "kris"])
+      %CreateAccount{username: "chris", email: "chris@example.com", age: 5, aliases: ["christopher", "kris"]}
+
+      iex> CreateAccount.validate(%{username: "chris", email: "chris@example.com", age: 5, aliases: ["christopher", "kris"]})
       #Ecto.Changeset<action: nil, changes: %{age: 5, aliases: ["christopher", "kris"], email: "chris@example.com", username: "chris"}, errors: [age: {"must be greater than %{number}", [validation: :number, kind: :greater_than, number: 12]}], data: #CreateAccount<>, valid?: false>
+
+      iex> CreateAccount.validate(%{email: "emailson", age: 5})
+      #Ecto.Changeset<action: nil, changes: %{age: 5, email: "emailson"}, errors: [age: {"must be greater than %{number}", [validation: :number, kind: :greater_than, number: 12]}, email: {"has invalid format", [validation: :format]}, username: {"can't be blank", [validation: :required]}], data: #CreateAccount<>, valid?: false>
   """
 
   @doc """
@@ -43,14 +49,34 @@ defmodule Commanded.Command do
         end)
       end
 
-      def new(attrs \\ []) do
-        attrs
+      def new(), do: %__MODULE__{}
+      def new(source)
+
+      def new(%{__struct__: _} = source) do
+        source
+        |> Map.from_struct()
+        |> new()
+      end
+
+      def new(source) when is_list(source) do
+        source
         |> Enum.into(%{})
+        |> new()
+      end
+
+      def new(source) when is_map(source) do
+        source |> create()
+      end
+
+      use ExConstructor, :create
+
+      def validate(command) when is_map(command) do
+        command
         |> cast()
         |> handle_validate()
       end
 
-      def handle_validate(changeset), do: changeset
+      def handle_validate(%Ecto.Changeset{} = changeset), do: changeset
 
       defoverridable handle_validate: 1
 

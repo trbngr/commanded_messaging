@@ -42,10 +42,10 @@ defmodule EsMessaging.MixProject do
   defp deps do
     [
       {:ecto, "~> 3.3"},
-      {:elixir_uuid, "~> 1.2", only: :test},
+      {:elixir_uuid, "~> 1.2"},
       {:exconstructor, "~> 1.1"},
       {:jason, "~> 1.1"},
-      {:commanded, "~> 1.0", only: :test},
+      {:commanded, "~> 1.1"},
       {:ex_doc, "~> 0.14", only: :dev, runtime: false}
     ]
   end
