@@ -104,8 +104,7 @@ iex> AccountCreated.new(cmd)
 %AccountCreated{
   age: 5,
   email: "chris@example.com",
-  username: "chris",
-  version: 1
+  username: "chris"
 }
 ```
 
@@ -125,8 +124,7 @@ iex> AccountCreated.new(cmd, date: NaiveDateTime.utc_now())
   age: 5,
   date: ~N[2019-07-25 08:03:15.372212],
   email: "chris@example.com",
-  username: "chris",
-  version: 1
+  username: "chris"
 }
 ```
 
@@ -143,23 +141,18 @@ defmodule AccountCreated do
 end
 
 iex> event = AccountCreated.new(cmd)
-%AccountCreated{age: 5, date: nil, username: "chris", version: 1}
+%AccountCreated{age: 5, date: nil, username: "chris"}
 ```
 
 #### Versioning
 
-You may have noticed that we provide a default version of `1`.
-
-You can change the version of an event at anytime.
-
-After doing so, you should define an upcast instance that knows how to transform older events into the latest version.
+You should define an upcast instance that knows how to transform older events into the latest version.
 
 ```elixir
 defmodule AccountCreated do
   use Commanded.Event,
-    version: 2,
     from: CreateAccount,
-    with: [:date, :sex],
+    with: [:date, :sex, version: 2],
     drop: [:email]
 
   defimpl Commanded.Event.Upcaster do

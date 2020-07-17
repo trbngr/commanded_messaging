@@ -19,7 +19,7 @@ defmodule Commanded.Event do
         drop: [:email]
 
       defimpl Commanded.Event.Upcaster, for: AccountCreatedWithDroppedKeys do
-        def upcast(event, _metadata) do
+        def upcast(%AccountCreatedWithDroppedKeys{} = event, _metadata) do
           AccountCreatedVersioned.new(event, sex: "maybe")
         end
 
