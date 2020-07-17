@@ -63,8 +63,10 @@ defmodule Commanded.Command do
   end
 
   def field_type(:binary_id), do: Ecto.UUID
+
   def field_type(:array) do
     raise "`:array` is not a valid Ecto.Type\nIf you are using a composite data type, wrap the type definition like this `{{:array, :string}}`"
   end
+
   def field_type(type), do: type
 end
