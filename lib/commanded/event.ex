@@ -7,7 +7,6 @@ defmodule Commanded.Event do
     * `from`      - A struct to adapt the keys from.
     * `with`      - A list of keys to add to the event.
     * `drop`      - A list of keys to drop from the keys adapted from a struct.
-    * `version`   - An optional version of the event. Defaults to `1`.
 
   ## Example
 
@@ -17,11 +16,10 @@ defmodule Commanded.Event do
       use Commanded.Event,
         from: CreateAccount,
         with: [:date, :sex, field_with_default_value: "default_value"],
-        drop: [:email],
-        version: 2
+        drop: [:email]
 
       defimpl Commanded.Event.Upcaster, for: AccountCreatedWithDroppedKeys do
-        def upcast(%{version: 1} = event, _metadata) do
+        def upcast(event, _metadata) do
           AccountCreatedVersioned.new(event, sex: "maybe")
         end
 
@@ -32,7 +30,7 @@ defmodule Commanded.Event do
     iex> cmd = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
     iex> event = AccountCreatedWithDroppedKeys.new(cmd)
     iex> Commanded.Event.Upcaster.upcast(event, %{})
-    %AccountCreatedVersioned{age: 5, date: nil, sex: "maybe", username: "chris", version: 2, field_with_default_value: "default_value"}
+    %AccountCreatedVersioned{age: 5, date: nil, sex: "maybe", username: "chris", field_with_default_value: "default_value"}
   """
 
   defmacro __using__(opts) do
@@ -52,7 +50,6 @@ defmodule Commanded.Event do
             |> Map.keys()
         end
 
-      version = Keyword.get(opts, :version, 1)
       keys_to_drop = Keyword.get(opts, :drop, [])
       explicit_keys = Keyword.get(opts, :with, [])
 
@@ -60,7 +57,6 @@ defmodule Commanded.Event do
       defstruct from
                 |> Kernel.++(explicit_keys)
                 |> Enum.reject(&Enum.member?(keys_to_drop, &1))
-                |> Kernel.++([{:version, version}])
                 |> Enum.uniq_by(fn
                   {key, _} -> key
                   key -> key
@@ -83,7 +79,6 @@ defmodule Commanded.Event do
 
       def new(source, attrs) when is_map(source) do
         source
-        |> Map.drop([:version])
         |> Map.merge(Enum.into(attrs, %{}))
         |> create()
       end

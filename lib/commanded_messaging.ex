@@ -60,7 +60,7 @@ defmodule CommandedMessaging do
 
     iex> cmd = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
     iex> BasicAccountCreated.new(cmd)
-    %BasicAccountCreated{age: 5, email: "chris@example.com", username: "chris", version: 1}
+    %BasicAccountCreated{age: 5, email: "chris@example.com", username: "chris"}
 
 
   ### Extra Keys
@@ -75,7 +75,7 @@ defmodule CommandedMessaging do
 
     iex> cmd = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
     iex> AccountCreatedWithExtraKeys.new(cmd, date: ~D[2019-07-25])
-    %AccountCreatedWithExtraKeys{age: 5, date: ~D[2019-07-25], email: "chris@example.com", username: "chris", version: 1}
+    %AccountCreatedWithExtraKeys{age: 5, date: ~D[2019-07-25], email: "chris@example.com", username: "chris"}
 
   ### Excluding Keys
 
@@ -90,26 +90,21 @@ defmodule CommandedMessaging do
 
     iex> cmd = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
     iex> AccountCreatedWithDroppedKeys.new(cmd)
-    %AccountCreatedWithDroppedKeys{age: 5, date: nil, username: "chris", version: 1}
+    %AccountCreatedWithDroppedKeys{age: 5, date: nil, username: "chris"}
 
   ### Versioning
 
-  You may have noticed that we provide a default version of `1`.
-
-  You can change the version of an event at anytime.
-
-  After doing so, you should define an upcast instance that knows how to transform older events into the latest version.
+  You should define an upcast instance that knows how to transform older events into the latest version.
 
     # This is for demonstration purposes only. You don't need to create a new event to version one.
     defmodule AccountCreatedVersioned do
       use Commanded.Event,
         from: CreateAccount,
         with: [:date, :sex, field_with_default_value: "default_value"],
-        drop: [:email],
-        version: 2
+        drop: [:email]
 
       defimpl Commanded.Event.Upcaster, for: AccountCreatedWithDroppedKeys do
-        def upcast(%{version: 1} = event, _metadata) do
+        def upcast(event, _metadata) do
           AccountCreatedVersioned.new(event, sex: "maybe")
         end
 
@@ -120,7 +115,7 @@ defmodule CommandedMessaging do
     iex> cmd = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
     iex> event = AccountCreatedWithDroppedKeys.new(cmd)
     iex> Commanded.Event.Upcaster.upcast(event, %{})
-    %AccountCreatedVersioned{age: 5, date: nil, sex: "maybe", username: "chris", version: 2, field_with_default_value: "default_value"}
+    %AccountCreatedVersioned{age: 5, date: nil, sex: "maybe", username: "chris", field_with_default_value: "default_value"}
 
   > Note that you won't normally call `upcast` manually. `Commanded` will take care of that for you.
 
