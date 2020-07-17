@@ -16,7 +16,7 @@ defmodule Commanded.Event do
     defmodule AccountCreatedVersioned do
       use Commanded.Event,
         from: CreateAccount,
-        with: [:date, :sex],
+        with: [:date, :sex, field_with_default_value: "default_value"],
         drop: [:email],
         version: 2
 
@@ -32,7 +32,7 @@ defmodule Commanded.Event do
     iex> cmd = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
     iex> event = AccountCreatedWithDroppedKeys.new(cmd)
     iex> Commanded.Event.Upcaster.upcast(event, %{})
-    %AccountCreatedVersioned{age: 5, date: nil, sex: "maybe", username: "chris", version: 2}
+    %AccountCreatedVersioned{age: 5, date: nil, sex: "maybe", username: "chris", version: 2, field_with_default_value: "default_value"}
   """
 
   defmacro __using__(opts) do

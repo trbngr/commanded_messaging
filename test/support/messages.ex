@@ -56,7 +56,7 @@ end
 defmodule AccountCreatedVersioned do
   use Commanded.Event,
     from: CreateAccount,
-    with: [:date, :sex, sex: "oh"],
+    with: [:date, :sex, field_with_default_value: "default_value"],
     drop: [:email],
     version: 2
 
