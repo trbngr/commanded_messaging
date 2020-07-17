@@ -11,9 +11,9 @@ defmodule Commanded.Middleware.CommandValidation do
 
       def handle_validate(changeset) do
         changeset
-        |> validate_required([:username, :email, :age, :aliases])
-        |> validate_format(:email, ~r/@/)
-        |> validate_number(:age, greater_than: 12)
+        |> Changeset.validate_required([:username, :email, :age])
+        |> Changeset.validate_format(:email, ~r/@/)
+        |> Changeset.validate_number(:age, greater_than: 12)
       end
     end
 

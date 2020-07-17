@@ -11,27 +11,28 @@ defmodule Commanded.Event do
 
   ## Example
 
-        # This is for demonstration purposes only. You don't need to create a new event to version one.
-        defmodule AccountCreatedVersioned do
-          use Commanded.Event,
-            version: 2,
-            from: CreateAccount,
-            with: [:date, :sex],
-            drop: [:email],
+  This is for demonstration purposes only. You don't need to create a new event to version one.
 
-          defimpl Commanded.Event.Upcaster, for: AccountCreatedWithDroppedKeys do
-            def upcast(%{version: 1} = event, _metadata) do
-              AccountCreatedVersioned.new(event, sex: "maybe", version: 2)
-            end
+    defmodule AccountCreatedVersioned do
+      use Commanded.Event,
+        from: CreateAccount,
+        with: [:date, :sex],
+        drop: [:email],
+        version: 2
 
-            def upcast(event, _metadata), do: event
-          end
+      defimpl Commanded.Event.Upcaster, for: AccountCreatedWithDroppedKeys do
+        def upcast(%{version: 1} = event, _metadata) do
+          AccountCreatedVersioned.new(event, sex: "maybe")
         end
 
-        # iex> cmd = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
-        # iex> event = AccountCreatedWithDroppedKeys.new(cmd)
-        # iex> Commanded.Event.Upcaster.upcast(event, %{})
-        # %AccountCreatedVersioned{age: 5, date: nil, sex: "maybe", username: "chris", version: 2}
+        def upcast(event, _metadata), do: event
+      end
+    end
+
+    iex> cmd = CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
+    iex> event = AccountCreatedWithDroppedKeys.new(cmd)
+    iex> Commanded.Event.Upcaster.upcast(event, %{})
+    %AccountCreatedVersioned{age: 5, date: nil, sex: "maybe", username: "chris", version: 2}
   """
 
   defmacro __using__(opts) do
@@ -60,6 +61,10 @@ defmodule Commanded.Event do
                 |> Kernel.++(explicit_keys)
                 |> Enum.reject(&Enum.member?(keys_to_drop, &1))
                 |> Kernel.++([{:version, version}])
+                |> Enum.uniq_by(fn
+                  {key, _} -> key
+                  key -> key
+                end)
 
       def new(), do: %__MODULE__{}
       def new(source, attrs \\ [])
@@ -77,7 +82,9 @@ defmodule Commanded.Event do
       end
 
       def new(source, attrs) when is_map(source) do
-        Map.merge(source, Enum.into(attrs, %{}))
+        source
+        |> Map.drop([:version])
+        |> Map.merge(Enum.into(attrs, %{}))
         |> create()
       end
 

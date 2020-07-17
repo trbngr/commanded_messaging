@@ -2,20 +2,20 @@ defmodule Commanded.Command do
   @moduledoc ~S"""
   Creates an `Ecto.Schema.embedded_schema` that supplies a command with all the validation power of the `Ecto.Changeset` data structure.
 
-      defmodule CreateAccount do
-        use Commanded.Command,
-          username: :string,
-          email: :string,
-          age: :integer,
-          aliases: {{:array, :string}}
+    defmodule CreateAccount do
+      use Commanded.Command,
+        username: :string,
+        email: :string,
+        age: :integer,
+        aliases: {{:array, :string}}
 
-        def handle_validate(changeset) do
-          changeset
-          |> validate_required([:username, :email, :age, :aliases])
-          |> validate_format(:email, ~r/@/)
-          |> validate_number(:age, greater_than: 12)
-        end
+      def handle_validate(changeset) do
+        changeset
+        |> Changeset.validate_required([:username, :email, :age])
+        |> Changeset.validate_format(:email, ~r/@/)
+        |> Changeset.validate_number(:age, greater_than: 12)
       end
+    end
 
       iex> CreateAccount.new(username: "chris", email: "chris@example.com", age: 5, aliases: ["christopher", "kris"])
       %CreateAccount{username: "chris", email: "chris@example.com", age: 5, aliases: ["christopher", "kris"]}
@@ -35,8 +35,10 @@ defmodule Commanded.Command do
   defmacro __using__(schema) do
     quote do
       use Ecto.Schema
-      import Ecto.Changeset
+      import Ecto.Schema, only: [embedded_schema: 1, field: 2, field: 3]
       import Commanded.Command
+
+      alias Ecto.Changeset
       @behaviour Commanded.Command
 
       @primary_key false
