@@ -77,6 +77,10 @@ defmodule Commanded.Event do
         |> new(attrs)
       end
 
+      def new(source, %{__struct__: _} = attrs) when is_map(source) do
+        new(source, Map.from_struct(attrs))
+      end
+
       def new(source, attrs) when is_map(source) do
         Map.merge(source, Enum.into(attrs, %{}))
         |> create()
