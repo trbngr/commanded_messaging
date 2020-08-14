@@ -9,7 +9,8 @@ defmodule CreateAccount do
   use Commanded.Command,
     username: :string,
     email: :string,
-    age: :integer
+    age: :integer,
+    aliases: {{:array, :string}}
 
   def handle_validate(changeset) do
     changeset

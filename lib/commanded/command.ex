@@ -6,18 +6,19 @@ defmodule Commanded.Command do
         use Commanded.Command,
           username: :string,
           email: :string,
-          age: :integer
+          age: :integer,
+          aliases: {{:array, :string}}
 
         def handle_validate(changeset) do
           changeset
-          |> validate_required([:username, :email, :age])
+          |> validate_required([:username, :email, :age, :aliases])
           |> validate_format(:email, ~r/@/)
           |> validate_number(:age, greater_than: 12)
         end
       end
 
-      iex> CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
-      #Ecto.Changeset<action: nil, changes: %{age: 5, email: "chris@example.com", username: "chris"}, errors: [age: {"must be greater than %{number}", [validation: :number, kind: :greater_than, number: 12]}], data: #CreateAccount<>, valid?: false>
+      iex> CreateAccount.new(username: "chris", email: "chris@example.com", age: 5, aliases: ["christopher", "kris"])
+      #Ecto.Changeset<action: nil, changes: %{age: 5, aliases: ["christopher", "kris"], email: "chris@example.com", username: "chris"}, errors: [age: {"must be greater than %{number}", [validation: :number, kind: :greater_than, number: 12]}], data: #CreateAccount<>, valid?: false>
   """
 
   @doc """
@@ -35,6 +36,8 @@ defmodule Commanded.Command do
       @primary_key false
       embedded_schema do
         Enum.map(unquote(schema), fn
+          {name, {{_, _} = composite_type, opts}} -> field(name, field_type(composite_type), opts)
+          {name, {{_, _} = composite_type}} -> field(name, field_type(composite_type))
           {name, {type, opts}} -> field(name, field_type(type), opts)
           {name, type} -> field(name, field_type(type))
         end)
@@ -60,5 +63,8 @@ defmodule Commanded.Command do
   end
 
   def field_type(:binary_id), do: Ecto.UUID
+  def field_type(:array) do
+    raise "`:array` is not a valid Ecto.Type\nIf you are using a composite data type, wrap the type definition like this `{{:array, :string}}`"
+  end
   def field_type(type), do: type
 end
