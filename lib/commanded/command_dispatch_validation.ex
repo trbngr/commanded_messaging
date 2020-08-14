@@ -23,7 +23,7 @@ defmodule Commanded.CommandDispatchValidation do
 
       def validate_and_dispatch(%Command{valid?: true} = command, opts) do
         command
-        |> Command.apply_changes()
+        |> Ecto.Changeset.apply_changes()
         |> __MODULE__.dispatch(opts)
       end
 

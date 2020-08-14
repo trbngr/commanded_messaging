@@ -9,13 +9,29 @@ defmodule CreateAccount do
   use Commanded.Command,
     username: :string,
     email: :string,
-    age: :integer
+    age: :integer,
+    aliases: {{:array, :string}}
 
   def handle_validate(changeset) do
     changeset
-    |> validate_required([:username, :email, :age])
-    |> validate_format(:email, ~r/@/)
-    |> validate_number(:age, greater_than: 12)
+    |> Changeset.validate_required([:username, :email, :age])
+    |> Changeset.validate_format(:email, ~r/@/)
+    |> Changeset.validate_number(:age, greater_than: 12)
+  end
+end
+
+defmodule CreateFakeAccount do
+  use Commanded.Command,
+    username: :string,
+    email: :string,
+    age: :integer,
+    aliases: {{:array, :string}}
+
+  def handle_validate(changeset) do
+    changeset
+    |> Changeset.validate_required([:username, :email, :age])
+    |> Changeset.validate_format(:email, ~r/@/)
+    |> Changeset.validate_number(:age, greater_than: 12)
   end
 end
 
@@ -40,12 +56,12 @@ end
 defmodule AccountCreatedVersioned do
   use Commanded.Event,
     from: CreateAccount,
-    with: [:date, :sex, version: 2],
+    with: [:date, :sex, field_with_default_value: "default_value"],
     drop: [:email]
 
   defimpl Commanded.Event.Upcaster, for: AccountCreatedWithDroppedKeys do
-    def upcast(%{version: 1} = event, _metadata) do
-      AccountCreatedVersioned.new(event, sex: "maybe", version: 2)
+    def upcast(%AccountCreatedWithDroppedKeys{} = event, _metadata) do
+      AccountCreatedVersioned.new(event, sex: "maybe")
     end
 
     def upcast(event, _metadata), do: event

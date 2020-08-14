@@ -3,4 +3,5 @@ defmodule CommandTest do
   doctest Commanded.Event
   doctest Commanded.Command
   doctest CommandedMessaging
+  doctest Commanded.Middleware.CommandValidation
 end
