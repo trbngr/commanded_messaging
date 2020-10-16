@@ -40,16 +40,26 @@ defmodule Commanded.Command do
         end)
       end
 
-      def new(attrs \\ []) do
+      def new(attrs \\ [], opts \\ [])
+
+      def new(attrs, []) do
         attrs
         |> Enum.into(%{})
         |> cast()
         |> handle_validate()
       end
 
-      def handle_validate(changeset), do: changeset
+      def new(attrs, opts) do
+        attrs
+        |> Enum.into(%{})
+        |> cast()
+        |> handle_validate(opts)
+      end
 
-      defoverridable handle_validate: 1
+      def handle_validate(changeset), do: handle_validate(changeset, [])
+      def handle_validate(changeset, _opts), do: changeset
+
+      defoverridable handle_validate: 1, handle_validate: 2
 
       @cast_keys unquote(schema) |> Enum.into(%{}) |> Map.keys()
 
