@@ -40,8 +40,9 @@ end
 defmodule AccountCreatedVersioned do
   use Commanded.Event,
     from: CreateAccount,
-    with: [:date, :sex, version: 2],
-    drop: [:email]
+    with: [:date, :sex],
+    drop: [:email],
+    version: 2
 
   defimpl Commanded.Event.Upcaster, for: AccountCreatedWithDroppedKeys do
     def upcast(%{version: 1} = event, _metadata) do

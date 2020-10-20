@@ -32,6 +32,8 @@ defmodule Commanded.Command do
       import Commanded.Command
       @behaviour Commanded.Command
 
+      @type t :: %Ecto.Changeset{data: %__MODULE__{}}
+
       @primary_key false
       embedded_schema do
         Enum.map(unquote(schema), fn
