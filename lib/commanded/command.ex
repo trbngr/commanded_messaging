@@ -18,6 +18,9 @@ defmodule Commanded.Command do
 
       iex> CreateAccount.new(username: "chris", email: "chris@example.com", age: 5)
       #Ecto.Changeset<action: nil, changes: %{age: 5, email: "chris@example.com", username: "chris"}, errors: [age: {"must be greater than %{number}", [validation: :number, kind: :greater_than, number: 12]}], data: #CreateAccount<>, valid?: false>
+
+      iex> CreateAccount.new!(username: "chris", email: "chris@example.com", age: 5)
+      ** (Commanded.CommandError) Invalid command
   """
 
   @doc """
@@ -56,6 +59,18 @@ defmodule Commanded.Command do
         |> Enum.into(%{})
         |> cast()
         |> handle_validate(opts)
+      end
+
+      def new!(attrs, opts \\ []) do
+        result =
+          attrs
+          |> new(opts)
+          |> apply_action(:create)
+
+        case result do
+          {:ok, command} -> command
+          {:error, command} -> raise Commanded.CommandError, command: command
+        end
       end
 
       def handle_validate(changeset), do: handle_validate(changeset, [])
